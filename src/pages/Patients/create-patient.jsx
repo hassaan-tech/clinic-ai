@@ -58,7 +58,16 @@ export default function CreatePatient({
       fields={[
         { name: "full_name", label: "Full Name" },
         { name: "phone", label: "Phone" },
-        { name: "gender", label: "Gender" },
+        {
+          name: "gender",
+          label: "Gender",
+          type: "select",
+          options: [
+            { label: "Male", value: "male" },
+            { label: "Female", value: "female" },
+            { label: "Other", value: "other" },
+          ],
+        },
       ]}
       initialValues={
         existingPatient || {

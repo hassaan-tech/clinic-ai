@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Building2, PlusCircle, User, LogOut, ChevronDown } from "lucide-react";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
-import CreateClinic from "../Clinics/create-clinic";
+import CreateClinic from "../clinics/create-clinic";
 
 export default function ClinicSelector() {
   const [clinics, setClinics] = useState([]);

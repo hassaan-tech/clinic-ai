@@ -3,7 +3,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 
 // ===== AUTH =====
 import Login from "./pages/auth/login"
-import Register from "./pages/Auth/register"
+import Register from "./pages/auth/register"
 
 // ===== DASHBOARD =====
 import ClinicDashboard from "./pages/dashboard/clinic-dashboard"
