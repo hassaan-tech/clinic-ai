@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import ProtectedRoute from "./components/Protected-route"
+import ProtectedRoute from "./components/protected-route"
 
 // ===== AUTH =====
 import Login from "./pages/auth/login"
