@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./components/Protected-route"
 
 // ===== AUTH =====
 import Login from "./pages/auth/login"
@@ -17,7 +17,7 @@ import Medicines from "./pages/medicines/medicines"
 import Settings from "./pages/settings/settings"
 
 // ===== LAYOUTS =====
-import ClinicLayout from "./components/layouts/ClinicLayout"
+import ClinicLayout from "./components/layouts/clinic-layout"
 
 // ===== STYLES =====
 import "./styles/custom.css"
