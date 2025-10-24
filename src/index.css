@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ===========================
+     🌤️ Light Theme (Default)
+     =========================== */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90% / 70%;
+    --input: 240 5.9% 90%;
+    --radius: 0.65rem;
+
+    /* Charts / Info Colors */
+    --info: 210 90% 55%;
+    --info-foreground: 210 100% 98%;
+    --warning: 40 95% 50%;
+    --warning-foreground: 40 100% 10%;
+
+    /* Default Accent (Green) */
+    --primary: 142 72% 45%;
+    --primary-foreground: 144 100% 98%;
+    --ring: 142 72% 45%;
+  }
+
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* ===========================
+     🌙 Dark Theme (90% Black)
+     =========================== */
+  .dark {
+    --background: 0 0% 10%; /* 90% black background */
+    --foreground: 0 0% 95%;
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 96%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 100% 96%;
+    --border: 0 0% 25% / 40%;
+    --input: 0 0% 25%;
+    --radius: 0.65rem;
+    --ring: 142 72% 38%;
+
+    --info: 210 85% 65%;
+    --info-foreground: 210 100% 98%;
+    --warning: 40 90% 55%;
+    --warning-foreground: 40 100% 10%;
+  }
+
+  /* ===========================
+     🌈 Accent Variants
+     =========================== */
+
+  /* Green (Default) */
+  :root,
+  [data-accent="green"] {
+    --primary: 142 72% 45%;
+    --primary-foreground: 144 100% 98%;
+    --primary-hover: 142 70% 38%;
+    --ring: 142 72% 45%;
+  }
+
+  /* Blue */
+  [data-accent="blue"] {
+    --primary: 217 91% 60%;
+    --primary-foreground: 217 100% 98%;
+    --primary-hover: 217 85% 52%;
+    --ring: 217 91% 60%;
+  }
+
+  /* Red */
+  [data-accent="red"] {
+    --primary: 0 80% 60%;
+    --primary-foreground: 0 100% 98%;
+    --primary-hover: 0 75% 52%;
+    --ring: 0 80% 60%;
+  }
+
+  /* Violet */
+  [data-accent="violet"] {
+    --primary: 262 83% 58%;
+    --primary-foreground: 262 100% 98%;
+    --primary-hover: 262 75% 50%;
+    --ring: 262 83% 58%;
+  }
+
+  /* Orange */
+  [data-accent="orange"] {
+    --primary: 25 90% 55%;
+    --primary-foreground: 25 100% 98%;
+    --primary-hover: 25 85% 50%;
+    --ring: 25 90% 55%;
+  }
+
+  /* Teal */
+  [data-accent="teal"] {
+    --primary: 174 70% 45%;
+    --primary-foreground: 174 100% 98%;
+    --primary-hover: 174 68% 38%;
+    --ring: 174 70% 45%;
+  }
+
+  /* Pink */
+  [data-accent="pink"] {
+    --primary: 330 80% 60%;
+    --primary-foreground: 330 100% 98%;
+    --primary-hover: 330 75% 55%;
+    --ring: 330 80% 60%;
+  }
+
+  /* Dark Mode Accent Adjustments */
+  [data-theme="dark"][data-accent="green"] {
+    --primary: 142 65% 55%;
+  }
+
+  [data-theme="dark"][data-accent="blue"] {
+    --primary: 217 88% 70%;
+  }
+
+  [data-theme="dark"][data-accent="red"] {
+    --primary: 0 75% 68%;
+  }
+
+  [data-theme="dark"][data-accent="violet"] {
+    --primary: 262 80% 70%;
+  }
+
+  [data-theme="dark"][data-accent="orange"] {
+    --primary: 25 85% 65%;
+  }
+
+  [data-theme="dark"][data-accent="teal"] {
+    --primary: 174 65% 55%;
+  }
+
+  [data-theme="dark"][data-accent="pink"] {
+    --primary: 330 75% 65%;
+  }
+
+  /* ===========================
+     🧭 Scrollbar Hiding Utility
+     =========================== */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
