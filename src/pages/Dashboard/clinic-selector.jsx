@@ -1,10 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Building2, PlusCircle, User, LogOut, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Building2,
+  PlusCircle,
+  User,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
 import ThemeToggleButton from "@/components/theme-toggle-button";
 import CreateClinic from "../clinics/create-clinic";
 
@@ -17,7 +34,9 @@ export default function ClinicSelector() {
   // === Load Doctor + Clinics ===
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data: doc } = await supabase
@@ -49,15 +68,19 @@ export default function ClinicSelector() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-6 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground px-4 sm:px-6 md:px-8 py-6 relative">
       {/* Theme Toggle */}
       <ThemeToggleButton />
 
       {/* Profile Dropdown - Top Right */}
-      <div className="absolute top-4 right-6">
+      <div className="absolute top-4 right-4 sm:right-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
               <User className="h-4 w-4" />
               {doctor?.display_name || "Profile"}
               <ChevronDown className="h-3 w-3" />
@@ -78,9 +101,9 @@ export default function ClinicSelector() {
       </div>
 
       {/* === Main Container === */}
-      <Card className="w-[80%] max-w-6xl shadow-md border-border glass">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-3xl font-semibold text-primary flex items-center justify-center gap-2">
+      <Card className="w-full max-w-5xl shadow-md border-border glass mx-auto">
+        <CardHeader className="text-center pb-4 px-4 sm:px-6">
+          <CardTitle className="text-2xl sm:text-3xl font-semibold text-primary flex items-center justify-center gap-2">
             <Building2 className="h-6 w-6 text-primary" />
             Welcome {doctor?.display_name || "Doctor"}
           </CardTitle>
@@ -89,18 +112,18 @@ export default function ClinicSelector() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="px-3 sm:px-5 pb-6">
           {clinics.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-10">
               No clinics found for this account.
             </p>
           ) : (
-            <div className="flex flex-wrap justify-center gap-6 max-h-[70vh] overflow-y-auto p-2 scrollbar-none">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 max-h-[70vh] overflow-y-auto p-1 scrollbar-none">
               {clinics.map((c) => (
                 <Card
                   key={c.id}
                   onClick={() => navigate(`/clinic/${c.id}/dashboard`)}
-                  className="cursor-pointer w-full sm:w-[45%] lg:w-[30%] hover:bg-accent/10 hover:shadow-md transition-transform duration-200 hover:scale-[1.02] border p-5"
+                  className="cursor-pointer w-full xs:w-[90%] sm:w-[45%] lg:w-[30%] hover:bg-accent/10 hover:shadow-md transition-transform duration-200 hover:scale-[1.02] border p-4 sm:p-5"
                 >
                   <div>
                     <h3 className="font-semibold text-lg text-primary mb-1">
@@ -122,7 +145,7 @@ export default function ClinicSelector() {
           )}
 
           {/* === Create Clinic Button === */}
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-8">
             <Button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 text-sm"

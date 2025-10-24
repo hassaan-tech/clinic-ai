@@ -20,6 +20,8 @@ import {
   Users,
   LayoutDashboard,
   Pill,
+  Menu,
+  X
 } from "lucide-react"
 
 export default function ClinicLayout() {
@@ -27,6 +29,7 @@ export default function ClinicLayout() {
   const navigate = useNavigate()
   const [clinics, setClinics] = useState([])
   const [selected, setSelected] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const navLinkClass = (isActive) =>
     cn(
@@ -85,6 +88,8 @@ export default function ClinicLayout() {
       document.documentElement.setAttribute("data-accent", clinic.accent_color)
       localStorage.setItem("accent-theme", clinic.accent_color)
     }
+
+    setSidebarOpen(false)
   }
 
   if (clinics.length === 0) {
@@ -96,25 +101,29 @@ export default function ClinicLayout() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
-      {/* ===== Sidebar ===== */}
+    <div className="flex h-screen w-full bg-[hsl(var(--background))] text-[hsl(var(--foreground))] relative">
+      {/* ===== Sidebar (Collapsible) ===== */}
       <aside
-        className="
-          w-64 lg:w-72
-          flex flex-col justify-between
-          shadow-md border-r border-[hsl(var(--border))]
-          bg-[hsla(0, 0%, 0%, 1.00))]
-          transition-colors duration-300
-        "
+        className={cn(
+          "fixed md:static z-40 top-0 left-0 h-full w-64 lg:w-72 flex flex-col justify-between shadow-md border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] dark:bg-[hsl(var(--card))] transition-all duration-300 transform",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
       >
-        <div className="p-4">
+        <div className="p-4 overflow-y-auto">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-between items-center mb-6">
             <img
               src="/duzeltilmis-logo-svg-1.svg"
               alt="Clinic Logo"
               className="h-8 w-auto object-contain"
             />
+            {/* Close Button (mobile) */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-muted-foreground hover:text-primary"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           {/* Clinic Switcher */}
@@ -122,9 +131,9 @@ export default function ClinicLayout() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between mb-4 text-sm truncate text-ellipsis overflow-hidden whitespace-nowrap"
+                className="w-full justify-between mb-4 text-sm truncate"
               >
-                {selected ? `${selected.name} ` : "Select Clinic"}
+                {selected ? `${selected.name}` : "Select Clinic"}
                 <ChevronDown className="ml-2 h-4 w-4 flex-shrink-0" />
               </Button>
             </DropdownMenuTrigger>
@@ -147,7 +156,7 @@ export default function ClinicLayout() {
                   key={c.id}
                   onClick={() => handleSelect(c)}
                   className={cn(
-                    "cursor-pointer text-sm transition-colors",
+                    "cursor-pointer text-sm",
                     selected?.id === c.id
                       ? "bg-[hsl(var(--primary)_/_15%)] text-primary font-medium"
                       : "hover:bg-[hsl(var(--primary)_/_10%)]"
@@ -160,35 +169,20 @@ export default function ClinicLayout() {
           </DropdownMenu>
 
           {/* Navigation */}
-          <nav className="space-y-2">
-            <NavLink
-              to={`/clinic/${id}/dashboard`}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
+          <nav className="space-y-2 mt-4">
+            <NavLink to={`/clinic/${id}/dashboard`} className={({ isActive }) => navLinkClass(isActive)}>
               <LayoutDashboard className="h-4 w-4" /> Dashboard
             </NavLink>
-            <NavLink
-              to={`/clinic/${id}/patients`}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
+            <NavLink to={`/clinic/${id}/patients`} className={({ isActive }) => navLinkClass(isActive)}>
               <Users className="h-4 w-4" /> Patients
             </NavLink>
-            <NavLink
-              to={`/clinic/${id}/appointments`}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
+            <NavLink to={`/clinic/${id}/appointments`} className={({ isActive }) => navLinkClass(isActive)}>
               <Calendar className="h-4 w-4" /> Appointments
             </NavLink>
-            <NavLink
-              to={`/clinic/${id}/medicines`}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
+            <NavLink to={`/clinic/${id}/medicines`} className={({ isActive }) => navLinkClass(isActive)}>
               <Pill className="h-4 w-4" /> Medicines
             </NavLink>
-            <NavLink
-              to={`/clinic/${id}/settings`}
-              className={({ isActive }) => navLinkClass(isActive)}
-            >
+            <NavLink to={`/clinic/${id}/settings`} className={({ isActive }) => navLinkClass(isActive)}>
               <Settings className="h-4 w-4" /> Settings
             </NavLink>
           </nav>
@@ -212,22 +206,41 @@ export default function ClinicLayout() {
           className="
             flex items-center justify-between
             border-b border-[hsl(var(--border))]
-            px-6 py-3
-            bg-[hsla(0, 0%, 0%, 1.00))]
-            transition-colors duration-300
+            px-4 sm:px-6 py-3
+            bg-[hsl(var(--card))]
+            sticky top-0 z-30
           "
         >
-          <h2 className="text-lg font-semibold">
-            {selected ? selected.name : "Clinic Dashboard"}
-          </h2>
+          <div className="flex items-center gap-3">
+            {/* Menu Toggle Button (Mobile) */}
+            <button
+              className="md:hidden text-muted-foreground hover:text-primary"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+
+            <h2 className="text-lg font-semibold">
+              {selected ? selected.name : "Clinic Dashboard"}
+            </h2>
+          </div>
+
           <ModeToggle />
         </div>
 
         {/* Page Content */}
-        <div className="flex-1 p-6 bg-[hsl(var(--background))]">
+        <div className="flex-1 p-4 sm:p-6 bg-[hsl(var(--background))]">
           <Outlet />
         </div>
       </main>
+
+      {/* Overlay (for mobile sidebar) */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 md:hidden z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   )
 }
