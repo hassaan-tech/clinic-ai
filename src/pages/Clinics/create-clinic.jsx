@@ -10,34 +10,19 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const PAKISTAN_CITIES = [
-  "Karachi",
-  "Lahore",
-  "Islamabad",
-  "Rawalpindi",
-  "Faisalabad",
-  "Multan",
-  "Hyderabad",
-  "Sialkot",
-  "Peshawar",
-  "Quetta",
-  "Gujranwala",
-  "Bahawalpur",
-  "Sukkur",
-  "Mardan",
-  "Abbottabad",
-  "Okara",
-  "Jhelum",
-  "Sargodha",
-  "Mirpur Khas",
-  "Rahim Yar Khan",
+  "Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Multan","Hyderabad",
+  "Sialkot","Peshawar","Quetta","Gujranwala","Bahawalpur","Sukkur","Mardan",
+  "Abbottabad","Okara","Jhelum","Sargodha","Mirpur Khas","Rahim Yar Khan",
 ];
 
 export default function CreateClinic({ open, onClose, onCreated }) {
   const [doctor, setDoctor] = useState(null);
+  const [org, setOrg] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fetchingDoctor, setFetchingDoctor] = useState(true);
+  const [fetching, setFetching] = useState(true);
   const [form, setForm] = useState({
     name: "",
     country: "Pakistan",
@@ -46,86 +31,165 @@ export default function CreateClinic({ open, onClose, onCreated }) {
     phone: "",
   });
 
-  // ✅ Load logged-in doctor automatically
-  useEffect(() => {
-    const loadDoctor = async () => {
-      setFetchingDoctor(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setFetchingDoctor(false);
-        return;
-      }
-
+  // ---------- helpers (no profiles dependency) ----------
+  const ensureDoctor = async (userId, email) => {
+    try {
       const { data: doc, error } = await supabase
         .from("doctors")
-        .select("*")
-        .eq("owner_user_id", user.id)
-        .single();
+        .select("id, owner_user_id, display_name")
+        .eq("owner_user_id", userId)
+        .maybeSingle();
 
       if (error) {
-        console.error("Error fetching doctor:", error.message);
-        setDoctor(null);
-      } else {
-        setDoctor(doc);
+        console.error("doctors select error:", error);
       }
+      if (doc) return doc;
 
-      setFetchingDoctor(false);
+      const display_name = email?.split("@")[0] || "Doctor";
+      const { data: created, error: insErr } = await supabase
+        .from("doctors")
+        .insert({
+          owner_user_id: userId,
+          display_name,
+          full_name: display_name,
+        })
+        .select()
+        .single();
+
+      if (insErr) {
+        console.error("doctors insert error:", insErr);
+        throw insErr;
+      }
+      return created;
+    } catch (e) {
+      console.error("ensureDoctor fatal:", e);
+      throw e;
+    }
+  };
+
+  const ensureOrg = async (owner_user_id, doctorDisplayName) => {
+    try {
+      const { data: existing, error } = await supabase
+        .from("orgs")
+        .select("id, name")
+        .eq("owner_user_id", owner_user_id)
+        .maybeSingle();
+      if (error) console.error("orgs select error:", error);
+      if (existing) return existing;
+
+      const name = `${doctorDisplayName || "Clinic"}'s Organization`;
+      const { data: created, error: insErr } = await supabase
+        .from("orgs")
+        .insert({ owner_user_id, name })
+        .select()
+        .single();
+      if (insErr) {
+        console.error("orgs insert error:", insErr);
+        throw insErr;
+      }
+      return created;
+    } catch (e) {
+      console.error("ensureOrg fatal:", e);
+      throw e;
+    }
+  };
+
+  // ---------- bootstrap on open ----------
+  useEffect(() => {
+    const bootstrap = async () => {
+      try {
+        setFetching(true);
+        const { data: auth } = await supabase.auth.getUser();
+        const user = auth?.user;
+        if (!user) {
+          setFetching(false);
+          return;
+        }
+
+        const doc = await ensureDoctor(user.id, user.email);
+        setDoctor(doc);
+
+        const theOrg = await ensureOrg(doc.owner_user_id, doc.display_name);
+        setOrg(theOrg);
+      } catch (err) {
+        console.error("Bootstrap error (doctor/org):", err);
+        toast.error("Unable to read or create your doctor profile. Please contact support.");
+      } finally {
+        setFetching(false);
+      }
     };
 
-    loadDoctor();
-  }, []);
+    if (open) bootstrap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleChange = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!doctor?.id) {
-      alert(
-        "Doctor profile not found. Please complete registration or log out and log back in."
-      );
+      toast.error("Doctor profile not found. Please log out and back in.");
       return;
     }
 
+    // basic validation
+    const name = form.name.trim();
+    if (!name) {
+      toast.error("Please enter a clinic name.");
+      return;
+    }
+    const city = form.city.trim();
+
     setLoading(true);
     try {
+      // optional: prevent duplicate clinic name within the same org/doctor
+      const { data: dup } = await supabase
+        .from("clinics")
+        .select("id")
+        .or(
+          // show dup if same name within this org OR (legacy) same doctor_id
+          `and(name.eq.${name},org_id.eq.${org?.id || "00000000-0000-0000-0000-000000000000"}),and(name.eq.${name},doctor_id.eq.${doctor.id})`
+        )
+        .limit(1);
+
+      if (dup && dup.length) {
+        toast.error("A clinic with this name already exists.");
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        doctor_id: doctor.id,
+        org_id: org?.id || null, // link to org for new data
+        name,
+        city,
+        address: form.address.trim(),
+        phone: form.phone.trim(),
+        timezone: "Asia/Karachi",
+        created_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from("clinics")
-        .insert([
-          {
-            doctor_id: doctor.id,
-            name: form.name.trim(),
-            city: form.city.trim(),
-            address: form.address.trim(),
-            phone: form.phone.trim(),
-            timezone: "Asia/Karachi",
-            created_at: new Date().toISOString(),
-          },
-        ])
+        .insert([payload])
         .select()
         .single();
 
       if (error) {
-        console.error("Supabase Insert Error:", error);
+        console.error("clinics insert error:", error);
         throw error;
       }
 
+      toast.success("Clinic created successfully!");
       onCreated?.(data);
-      setForm({
-        name: "",
-        country: "Pakistan",
-        city: "",
-        address: "",
-        phone: "",
-      });
+
+      // reset + close
+      setForm({ name: "", country: "Pakistan", city: "", address: "", phone: "" });
       onClose();
     } catch (err) {
       console.error("Error creating clinic:", err);
-      alert("Error creating clinic: " + err.message);
+      toast.error(err.message || "Error creating clinic");
     } finally {
       setLoading(false);
     }
@@ -138,10 +202,8 @@ export default function CreateClinic({ open, onClose, onCreated }) {
           <DialogTitle>Create New Clinic</DialogTitle>
         </DialogHeader>
 
-        {fetchingDoctor ? (
-          <p className="text-center text-muted-foreground py-6">
-            Loading your profile...
-          </p>
+        {fetching ? (
+          <p className="text-center text-muted-foreground py-6">Preparing your profile…</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -156,11 +218,7 @@ export default function CreateClinic({ open, onClose, onCreated }) {
 
             <div>
               <Label>Country</Label>
-              <Input
-                value={form.country}
-                disabled
-                className="bg-muted text-foreground/70"
-              />
+              <Input value={form.country} disabled className="bg-muted text-foreground/70" />
             </div>
 
             <div>
@@ -198,16 +256,17 @@ export default function CreateClinic({ open, onClose, onCreated }) {
               />
             </div>
 
+            {org && (
+              <p className="text-xs text-muted-foreground">
+                This clinic will be created under org: <b>{org.name}</b>
+              </p>
+            )}
+
             <DialogFooter>
               <Button type="submit" disabled={loading}>
                 {loading ? "Creating..." : "Create Clinic"}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
+              <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                 Cancel
               </Button>
             </DialogFooter>

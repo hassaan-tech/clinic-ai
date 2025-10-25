@@ -45,7 +45,7 @@
      🌙 Dark Theme (90% Black)
      =========================== */
   .dark {
-    --background: 0 0% 10%; /* 90% black background */
+    --background: 0 0% 0%; /* 90% black background */
     --foreground: 0 0% 95%;
     --card: 0 0% 13%;
     --card-foreground: 0 0% 96%;
